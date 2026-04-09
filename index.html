@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Window Garden Idle 🌸</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --wood:       #7A4F2F;
+  --wood-mid:   #8B5E3C;
+  --wood-light: #B07A52;
+  --sill:       #9B6435;
+  --sill-top:   #B07845;
+  --cream:      #FFF8F0;
+  --text:       #4A3728;
+  --pollen:     #F5B800;
+  --green:      #5FA048;
+  --terracotta: #B8401A;
+  --terra-rim:  #CF5428;
+  --shadow:     rgba(60,30,10,0.18);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: #D4B896;
+  background-image:
+    radial-gradient(ellipse at 15% 15%, rgba(255,220,160,0.35) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 85%, rgba(180,140,200,0.2) 0%, transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+.game-wrap {
+  display: flex;
+  gap: 18px;
+  max-width: 820px;
+  width: 100%;
+  align-items: flex-start;
+}
+
+/* ─────────── WINDOW ─────────── */
+.window-outer {
+  width: 460px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    0 12px 40px rgba(0,0,0,0.28),
+    0 2px 8px rgba(0,0,0,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+  position: relative;
+  background: var(--wood);
+}
+
+/* outer frame border */
+.window-frame-border {
+  position: absolute; inset: 0;
+  border: 14px solid transparent;
+  border-radius: 14px;
+  background:
+    linear-gradient(var(--wood-light), var(--wood)) border-box,
+    linear-gradient(var(--wood-mid), var(--wood-mid)) padding-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.window-scene {
+  margin: 14px 14px 0;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  background: #87CEEB;
+}
+
+.sky {
+  width: 100%; height: 280px;
+  position: relative;
+  overflow: hidden;
+  transition: background 6s ease;
+}
+
+/* window cross bars */
+.bar { position: absolute; background: var(--wood-mid); z-index: 10; pointer-events: none; }
+.bar-h {
+  height: 11px; left: 0; right: 0;
+  top: 50%; transform: translateY(-50%);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.bar-v {
+  width: 11px; top: 0; bottom: 0;
+  left: 50%; transform: translateX(-50%);
+  box-shadow: 2px 0 6px rgba(0,0,0,0.2), inset 1px 0 0 rgba(255,255,255,0.1);
+}
+
+/* Celestial body */
+.celestial {
+  position: absolute;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  transition: background 5s ease, box-shadow 5s ease, opacity 3s ease;
+  pointer-events: none; z-index: 5;
+}
+
+/* Stars */
+.stars { position: absolute; inset: 0; opacity: 0; transition: opacity 4s ease; pointer-events: none; z-index: 3; }
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 2.5s ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.15; }
+}
+
+/* Clouds */
+.cloud {
+  position: absolute;
+  background: rgba(255,255,255,0.78);
+  border-radius: 50px;
+  pointer-events: none;
+  animation: cloudDrift linear infinite;
+  z-index: 4;
+  transition: opacity 4s ease;
+}
+@keyframes cloudDrift {
+  from { transform: translateX(-160px); }
+  to   { transform: translateX(520px); }
+}
+
+/* Pollen particles */
+.pollen-p {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 15;
+  animation: floatUp linear forwards;
+}
+@keyframes floatUp {
+  0%   { transform: translateY(0) translateX(0); opacity: 0.9; }
+  100% { transform: translateY(-130px) translateX(var(--dx)); opacity: 0; }
+}
+
+/* Bee */
+.bee {
+  position: absolute; font-size: 17px;
+  pointer-events: none; z-index: 12; display: none;
+  animation: beeFly 9s ease-in-out infinite;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+}
+@keyframes beeFly {
+  0%   { transform: translate(15px,  80px) rotate(0deg) scaleX(1);  }
+  20%  { transform: translate(140px, 35px) rotate(5deg) scaleX(1);  }
+  40%  { transform: translate(310px, 70px) rotate(-4deg) scaleX(1); }
+  55%  { transform: translate(380px, 25px) rotate(6deg) scaleX(1);  }
+  70%  { transform: translate(220px, 60px) rotate(-3deg) scaleX(-1); }
+  85%  { transform: translate(80px,  90px) rotate(2deg) scaleX(-1); }
+  100% { transform: translate(15px,  80px) rotate(0deg) scaleX(1);  }
+}
+
+/* Windowsill */
+.windowsill {
+  background: linear-gradient(180deg, var(--sill-top) 0%, var(--sill) 100%);
+  height: 66px;
+  padding: 0 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    inset 0 5px 12px rgba(0,0,0,0.18),
+    inset 0 -1px 3px rgba(0,0,0,0.12);
+}
+.sill-lip {
+  position: absolute; bottom: 0; left: -14px; right: -14px;
+  height: 16px;
+  background: var(--wood);
+  border-radius: 0 0 4px 4px;
+  box-shadow: inset 0 3px 6px rgba(0,0,0,0.15);
+}
+
+/* Plants */
+.pot-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  animation: potPop 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  flex-shrink: 0;
+}
+@keyframes potPop {
+  from { transform: translateY(70px) scale(0.4); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+.plant-em {
+  font-size: 24px; line-height: 1; display: block;
+  transform-origin: bottom center;
+  animation: sway 3.2s ease-in-out infinite;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.12));
+}
+@keyframes sway {
+  0%,100% { transform: rotate(-3.5deg); }
+  50%     { transform: rotate(3.5deg);  }
+}
+.pot-wrap:nth-child(2n)   .plant-em { animation-delay: -1.1s;  animation-duration: 2.8s; }
+.pot-wrap:nth-child(3n)   .plant-em { animation-delay: -2.2s;  animation-duration: 3.6s; }
+.pot-wrap:nth-child(4n)   .plant-em { animation-delay: -0.6s;  animation-duration: 3.0s; }
+.pot-wrap:nth-child(5n)   .plant-em { animation-delay: -1.8s;  animation-duration: 2.6s; }
+
+.pot-rim  { width: 33px; height: 5px; background: var(--terra-rim); border-radius: 3px 3px 0 0; }
+.pot-body {
+  width: 29px; height: 20px;
+  background: linear-gradient(160deg, #C95030 0%, var(--terracotta) 60%, #A03515 100%);
+  clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+  position: relative;
+}
+
+/* ─────────── UI PANEL ─────────── */
+.ui-panel {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+  gap: 10px;
+}
+
+.card {
+  background: rgba(255,248,242,0.88);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 13px 15px;
+  border: 1.5px solid rgba(255,255,255,0.72);
+  box-shadow: 0 4px 18px rgba(60,30,10,0.09), 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.sec-label {
+  font-size: 10px; font-weight: 800;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: #A07040; margin-bottom: 9px;
+}
+
+/* Resource display */
+.res-row { display: flex; align-items: center; gap: 10px; }
+.res-icon { font-size: 26px; }
+.pollen-val {
+  font-size: 30px; font-weight: 800;
+  color: var(--text); line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.pollen-rate { font-size: 11px; color: #A08060; margin-top: 2px; font-weight: 600; }
+
+.time-row { display: flex; align-items: center; gap: 7px; margin-top: 8px; }
+.time-bar {
+  flex: 1; height: 7px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 4px; overflow: hidden;
+}
+.time-fill { height: 100%; border-radius: 4px; transition: width 0.6s linear, background 5s ease; }
+.time-lbl  { font-size: 10px; font-weight: 800; color: #A07040; min-width: 38px; text-align: right; }
+.time-em   { font-size: 15px; }
+
+/* Plant buy cards */
+.plant-row {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.55);
+  border-radius: 11px; margin-bottom: 6px;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+  user-select: none;
+}
+.plant-row:last-child { margin-bottom: 0; }
+.plant-row.can-afford:hover {
+  background: rgba(255,255,255,0.92);
+  border-color: rgba(245,184,0,0.45);
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 14px rgba(60,30,10,0.1);
+}
+.plant-row.can-afford:active { transform: translateY(0); }
+.plant-row.no-afford { opacity: 0.48; cursor: not-allowed; }
+.plant-row-em { font-size: 22px; }
+.plant-row-info { flex: 1; }
+.plant-row-name { font-size: 12px; font-weight: 700; color: var(--text); }
+.plant-row-desc { font-size: 10px; color: #AAA; }
+.plant-row-right { text-align: right; }
+.plant-row-cost { font-size: 11px; font-weight: 700; color: #9A6010; display:flex; align-items:center; gap:2px; justify-content:flex-end; }
+.plant-row-owned { font-size: 10px; color: var(--green); font-weight: 700; }
+
+/* Upgrade cards */
+.upg-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 9px;
+  background: rgba(255,255,255,0.55);
+  border-radius: 10px; margin-bottom: 5px;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+  user-select: none;
+}
+.upg-row:last-child { margin-bottom: 0; }
+.upg-row.can-afford:hover {
+  background: rgba(255,255,255,0.92);
+  border-color: rgba(100,200,255,0.4);
+  transform: translateY(-1px);
+}
+.upg-row.no-afford { opacity: 0.38; cursor: not-allowed; }
+.upg-row.done { background: rgba(95,160,72,0.1); border-color: rgba(95,160,72,0.28); cursor: default; opacity: 0.7; }
+.upg-icon { font-size: 18px; }
+.upg-info { flex: 1; }
+.upg-name { font-size: 11px; font-weight: 700; color: var(--text); }
+.upg-desc { font-size: 10px; color: #AAA; }
+.upg-cost { font-size: 10px; font-weight: 700; color: #9A6010; }
+
+/* Water btn */
+.water-btn {
+  width: 100%; padding: 11px; border: none; border-radius: 13px;
+  font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  gap: 6px; transition: all 0.15s ease;
+  background: linear-gradient(135deg, #64B5F6, #3A9EF0);
+  color: white;
+  box-shadow: 0 4px 14px rgba(66,165,245,0.3);
+}
+.water-btn:hover:not(:disabled) {
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 18px rgba(66,165,245,0.38);
+}
+.water-btn:active:not(:disabled) { transform: translateY(0); }
+.water-btn:disabled { background: linear-gradient(135deg, #bbb, #aaa); box-shadow: none; cursor: not-allowed; }
+.water-btn.active { background: linear-gradient(135deg, #81C784, #4CAF50) !important; box-shadow: 0 4px 14px rgba(76,175,80,0.35) !important; }
+.water-sub { text-align: center; font-size: 10px; color: #AAA; margin-top: 5px; min-height: 13px; font-weight: 600; }
+
+/* Float text (from plant buy) */
+.float-txt {
+  position: absolute; pointer-events: none; z-index: 50;
+  font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 800;
+  color: #F5B800; text-shadow: 0 1px 4px rgba(0,0,0,0.22);
+  animation: ftAnim 1.3s ease-out forwards;
+}
+@keyframes ftAnim {
+  0%   { transform: translateY(0);   opacity: 1; }
+  100% { transform: translateY(-50px); opacity: 0; }
+}
+
+/* Toast */
+#toast {
+  position: fixed; bottom: 22px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: rgba(50,35,20,0.92); color: #FFF8F0;
+  padding: 10px 20px; border-radius: 22px;
+  font-size: 12px; font-weight: 700;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  z-index: 999; pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* Sunbeam rays */
+.sunrays {
+  position: absolute; inset: 0; z-index: 2;
+  pointer-events: none; opacity: 0;
+  transition: opacity 4s ease;
+  background: repeating-conic-gradient(
+    from 0deg at 50% 0%,
+    rgba(255,240,180,0.08) 0deg 5deg,
+    transparent 5deg 14deg
+  );
+}
+
+/* Rain effect */
+.raindrops { position: absolute; inset: 0; z-index: 6; pointer-events: none; overflow: hidden; }
+.raindrop {
+  position: absolute; width: 1.5px;
+  background: linear-gradient(180deg, transparent, rgba(180,220,255,0.6));
+  animation: fall linear infinite;
+}
+@keyframes fall {
+  from { top: -20px; }
+  to   { top: 110%; }
+}
+
+/* ─────────── MAIN MENU ─────────── */
+#menuOverlay {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  background: #D4B896;
+  background-image:
+    radial-gradient(ellipse at 15% 15%, rgba(255,220,160,0.4) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 80%, rgba(180,140,200,0.25) 0%, transparent 55%);
+  transition: opacity 0.6s ease;
+}
+#menuOverlay.hidden {
+  opacity: 0; pointer-events: none;
+}
+
+.menu-card {
+  background: rgba(255,250,244,0.93);
+  backdrop-filter: blur(16px);
+  border-radius: 28px;
+  padding: 40px 44px 36px;
+  max-width: 380px; width: 100%;
+  text-align: center;
+  border: 2px solid rgba(255,255,255,0.8);
+  box-shadow:
+    0 24px 60px rgba(60,30,10,0.18),
+    0 4px 16px rgba(0,0,0,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+  animation: menuIn 0.7s cubic-bezier(0.34,1.4,0.64,1) both;
+}
+@keyframes menuIn {
+  from { transform: translateY(30px) scale(0.95); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.menu-flowers {
+  font-size: 34px; letter-spacing: 6px;
+  margin-bottom: 16px;
+  animation: floatBob 3s ease-in-out infinite;
+  display: block;
+}
+@keyframes floatBob {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-5px); }
+}
+
+.menu-title {
+  font-size: 34px; font-weight: 800;
+  color: var(--text);
+  line-height: 1.1; margin-bottom: 6px;
+}
+.menu-title span { color: var(--green); }
+
+.menu-sub {
+  font-size: 13px; font-style: italic;
+  color: #B09070; margin-bottom: 28px; font-weight: 600;
+}
+
+.menu-divider {
+  width: 48px; height: 3px;
+  background: linear-gradient(90deg, var(--terra-rim), var(--pollen));
+  border-radius: 2px; margin: 0 auto 28px;
+}
+
+.menu-btn {
+  display: block; width: 100%;
+  padding: 13px 20px;
+  border: none; border-radius: 14px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+  margin-bottom: 10px;
+}
+.menu-btn:last-of-type { margin-bottom: 0; }
+.menu-btn:hover { transform: translateY(-2px); }
+.menu-btn:active { transform: translateY(0); }
+
+.btn-new {
+  background: linear-gradient(135deg, #6BBF5A, #4CAF50);
+  color: white;
+  box-shadow: 0 5px 18px rgba(76,175,80,0.35);
+}
+.btn-new:hover { box-shadow: 0 8px 22px rgba(76,175,80,0.42); }
+
+.btn-continue {
+  background: linear-gradient(135deg, #F5B800, #E8A000);
+  color: white;
+  box-shadow: 0 5px 18px rgba(232,160,0,0.35);
+}
+.btn-continue:hover { box-shadow: 0 8px 22px rgba(232,160,0,0.42); }
+
+.menu-reset {
+  margin-top: 16px;
+  font-size: 11px; color: #C0A080; font-weight: 600;
+  cursor: pointer; text-decoration: underline;
+  background: none; border: none;
+  font-family: 'Nunito', sans-serif;
+  transition: color 0.15s ease;
+}
+.menu-reset:hover { color: #C04020; }
+
+.menu-tip {
+  margin-top: 18px;
+  font-size: 11px; color: #C0A888; font-style: italic;
+  line-height: 1.5;
+}
+
+/* Confirm reset dialog */
+.confirm-box {
+  display: none;
+  background: rgba(255,240,230,0.95);
+  border-radius: 12px; padding: 14px;
+  margin-top: 14px;
+  border: 1.5px solid rgba(200,100,50,0.3);
+  font-size: 12px; color: var(--text); font-weight: 600;
+}
+.confirm-box.show { display: block; }
+.confirm-btns { display: flex; gap: 8px; margin-top: 10px; justify-content: center; }
+.confirm-btns button {
+  padding: 6px 16px; border-radius: 8px; border: none;
+  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+  cursor: pointer;
+}
+.btn-yes { background: #E05030; color: white; }
+.btn-no  { background: #DDD; color: #555; }
+
+/* Responsive */
+@media (max-width: 680px) {
+  .game-wrap { flex-direction: column; align-items: center; }
+  .window-outer { width: 100%; max-width: 460px; }
+}
+</style>
+</head>
+<body>
+<!-- MAIN MENU -->
+<div id="menuOverlay">
+  <div class="menu-card">
+    <span class="menu-flowers">🌼🌷🌻</span>
+    <div class="menu-title">Window <span>Garden</span></div>
+    <div class="menu-sub">a cozy idle garden</div>
+    <div class="menu-divider"></div>
+
+    <button class="menu-btn btn-new" id="btnNew" onclick="startNewGame()">
+      🌱 New Garden
+    </button>
+    <button class="menu-btn btn-continue" id="btnContinue" onclick="startContinue()" style="display:none">
+      🌿 Continue Garden
+    </button>
+
+    <button class="menu-reset" id="resetBtn" onclick="toggleConfirm()" style="display:none">
+      reset save data
+    </button>
+
+    <div class="confirm-box" id="confirmBox">
+      Are you sure? Your garden will be lost forever 🥺
+      <div class="confirm-btns">
+        <button class="btn-yes" onclick="confirmReset()">Yes, reset</button>
+        <button class="btn-no"  onclick="toggleConfirm()">No, keep it</button>
+      </div>
+    </div>
+
+    <div class="menu-tip">
+      Plants grow on their own — even when you're away 🌸
+    </div>
+  </div>
+</div>
+
+<div class="game-wrap">
+
+  <!-- WINDOW SCENE -->
+  <div class="window-outer" id="windowOuter">
+    <div class="window-frame-border"></div>
+    <div class="window-scene">
+      <div class="sky" id="sky">
+        <div class="sunrays" id="sunrays"></div>
+        <div class="stars"   id="stars"></div>
+        <div class="celestial" id="celestial"></div>
+        <div class="raindrops" id="raindrops"></div>
+        <div id="cloudBox"></div>
+        <div id="particleBox"></div>
+        <div class="bee" id="bee">🐝</div>
+      </div>
+      <div class="bar bar-h"></div>
+      <div class="bar bar-v"></div>
+      <div class="windowsill" id="sill">
+        <div id="potBox" style="display:flex;gap:7px;align-items:flex-start;height:100%;padding-top:6px;"></div>
+        <div class="sill-lip"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UI PANEL -->
+  <div class="ui-panel">
+
+    <!-- Resources -->
+    <div class="card">
+      <div class="sec-label">Garden</div>
+      <div class="res-row">
+        <span class="res-icon">🌿</span>
+        <div>
+          <div class="pollen-val" id="pollenVal">0</div>
+          <div class="pollen-rate" id="pollenRate">+0.0 pollen/sec</div>
+        </div>
+      </div>
+      <div class="time-row">
+        <span class="time-em" id="timeEm">☀️</span>
+        <div class="time-bar"><div class="time-fill" id="timeFill"></div></div>
+        <span class="time-lbl" id="timeLbl">Day</span>
+      </div>
+    </div>
+
+    <!-- Plants -->
+    <div class="card">
+      <div class="sec-label">Plants</div>
+      <div id="plantList"></div>
+    </div>
+
+    <!-- Water -->
+    <div class="card">
+      <button class="water-btn" id="waterBtn" onclick="doWater()">
+        💧 Water Plants
+      </button>
+      <div class="water-sub" id="waterSub">×3 pollen for 30 seconds</div>
+    </div>
+
+    <!-- Upgrades -->
+    <div class="card">
+      <div class="sec-label">Upgrades</div>
+      <div id="upgList"></div>
+    </div>
+
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────
+//  DATA
+// ─────────────────────────────────────────
+const PLANTS = [
+  { id:'daisy',     emoji:'🌼', name:'Daisy',
+    baseCost:10,  costMult:1.12, baseGen:0.3,
+    desc:'+0.3 pollen/sec' },
+  { id:'tulip',     emoji:'🌷', name:'Tulip',
+    baseCost:75,  costMult:1.14, baseGen:2.0,
+    desc:'+2.0 pollen/sec' },
+  { id:'sunflower', emoji:'🌻', name:'Sunflower',
+    baseCost:400, costMult:1.16, baseGen:12,
+    desc:'+12 pollen/sec, ×1.5 during day', dayBonus:true },
+];
+
+const UPGRADES = [
+  { id:'richSoil',    icon:'🌱', name:'Rich Soil',
+    desc:'All pollen generation ×1.5',  cost:150 },
+  { id:'beeFriend',   icon:'🐝', name:'Bee Friend',
+    desc:'A bee auto-waters every 45s',  cost:300 },
+  { id:'nightBloom',  icon:'🌙', name:'Night Bloom',
+    desc:'Remove night-time penalty',   cost:650 },
+  { id:'sunbeam',     icon:'🔆', name:'Sunbeam Glass',
+    desc:'Sunflower day bonus ×2',      cost:1200 },
+  { id:'goldenPollen',icon:'✨', name:'Golden Pollen',
+    desc:'All pollen generation ×2',   cost:3500 },
+  { id:'greenhouse',  icon:'🏡', name:'Greenhouse',
+    desc:'All pollen generation ×3',   cost:15000 },
+];
+
+// ─────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────
+let S = {
+  pollen: 0,
+  plants: { daisy:0, tulip:0, sunflower:0 },
+  upgrades: [],
+  mult: 1,
+  beeActive: false,
+  nightBloom: false,
+  sunbeam: false,
+  dayT: 0.25,           // 0–1 day cycle position
+  waterActive: false,
+  waterEnd: 0,
+  waterCoolEnd: 0,
+  beeNextWater: 0,
+  lastSave: 0,
+  rafT: null,
+};
+
+const DAY_MS   = 5 * 60 * 1000; // 5-minute full cycle
+const WATER_DUR = 30000;
+const WATER_CD  = 60000;
+const BEE_INT   = 45000;
+
+// ─────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────
+function fmt(n) {
+  if (n >= 1e9) return (n/1e9).toFixed(2)+'B';
+  if (n >= 1e6) return (n/1e6).toFixed(2)+'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1)+'K';
+  return Math.floor(n).toString();
+}
+
+function plantCost(id) {
+  const p = PLANTS.find(x=>x.id===id);
+  return Math.ceil(p.baseCost * Math.pow(p.costMult, S.plants[id]));
+}
+
+function phase() {
+  const t = S.dayT;
+  if (t < 0.15) return 'dawn';
+  if (t < 0.65) return 'day';
+  if (t < 0.80) return 'dusk';
+  return 'night';
+}
+
+function genRate() {
+  let r = 0;
+  const ph = phase();
+  for (const p of PLANTS) {
+    let pr = S.plants[p.id] * p.baseGen;
+    if (p.dayBonus && ph==='day') pr *= S.sunbeam ? 3 : 1.5;
+    r += pr;
+  }
+  r *= S.mult;
+  if (ph==='day')                     r *= 1.2;
+  else if (ph==='night' && !S.nightBloom) r *= 0.7;
+  if (S.waterActive && Date.now()<S.waterEnd) r *= 3;
+  return r;
+}
+
+// ─────────────────────────────────────────
+//  GAME LOOP
+// ─────────────────────────────────────────
+function loop(ts) {
+  if (!S.rafT) S.rafT = ts;
+  const dt = Math.min(ts - S.rafT, 3000);
+  S.rafT = ts;
+  const sec = dt / 1000;
+
+  S.dayT = (S.dayT + dt / DAY_MS) % 1;
+  S.pollen += genRate() * sec;
+
+  const now = Date.now();
+  if (S.waterActive && now > S.waterEnd)  S.waterActive = false;
+  if (S.beeActive   && now > S.beeNextWater) { triggerWater(true); S.beeNextWater = now + BEE_INT; }
+  if (now - S.lastSave > 30000) save();
+
+  render();
+  tickParticles(sec);
+  tickSky();
+
+  requestAnimationFrame(loop);
+}
+
+// ─────────────────────────────────────────
+//  ACTIONS
+// ─────────────────────────────────────────
+function buyPlant(id) {
+  const cost = plantCost(id);
+  if (S.pollen < cost) return;
+  S.pollen -= cost;
+  S.plants[id]++;
+  updatePots();
+  floatText('+1 ' + PLANTS.find(p=>p.id===id).emoji);
+  renderPlants();
+}
+
+function doWater() {
+  if (Date.now() < S.waterCoolEnd) return;
+  triggerWater(false);
+}
+
+function triggerWater(auto) {
+  S.waterActive = true;
+  S.waterEnd    = Date.now() + WATER_DUR;
+  if (!auto) S.waterCoolEnd = Date.now() + WATER_CD;
+  burst(22);
+  if (!auto) toast('💧 Plants watered! ×3 pollen for 30s');
+}
+
+function buyUpgrade(id) {
+  const u = UPGRADES.find(x=>x.id===id);
+  if (!u || S.upgrades.includes(id) || S.pollen < u.cost) return;
+  S.pollen -= u.cost;
+  S.upgrades.push(id);
+  applyUpgrade(id);
+  renderUpgrades();
+  toast('✨ ' + u.name + ' unlocked!');
+}
+
+function applyUpgrade(id) {
+  if (id==='richSoil')    S.mult    *= 1.5;
+  if (id==='beeFriend')   { S.beeActive=true; document.getElementById('bee').style.display='block'; }
+  if (id==='nightBloom')  S.nightBloom = true;
+  if (id==='sunbeam')     S.sunbeam    = true;
+  if (id==='goldenPollen') S.mult  *= 2;
+  if (id==='greenhouse')   S.mult  *= 3;
+}
+
+// ─────────────────────────────────────────
+//  RENDER
+// ─────────────────────────────────────────
+let _lastPSig='', _lastUSig='';
+
+function render() {
+  // Pollen
+  document.getElementById('pollenVal').textContent  = fmt(S.pollen);
+  document.getElementById('pollenRate').textContent = '+' + genRate().toFixed(1) + ' pollen/sec';
+
+  // Time bar
+  const ph = phase();
+  const tf = document.getElementById('timeFill');
+  tf.style.width = (S.dayT*100)+'%';
+  const bars = {
+    dawn:  'linear-gradient(90deg,#FF8C60,#FFCC88)',
+    day:   'linear-gradient(90deg,#5BB8F5,#87CEEB)',
+    dusk:  'linear-gradient(90deg,#E05030,#FF9955)',
+    night: 'linear-gradient(90deg,#1A1A4E,#3A3870)',
+  };
+  const emjs = { dawn:'🌅', day:'☀️', dusk:'🌇', night:'🌙' };
+  const lbls = { dawn:'Dawn', day:'Day', dusk:'Dusk', night:'Night' };
+  tf.style.background = bars[ph];
+  document.getElementById('timeEm').textContent  = emjs[ph];
+  document.getElementById('timeLbl').textContent = lbls[ph];
+
+  // Water btn
+  const now = Date.now();
+  const wb  = document.getElementById('waterBtn');
+  const ws  = document.getElementById('waterSub');
+  if (S.waterActive) {
+    wb.disabled = true; wb.className = 'water-btn active';
+    wb.innerHTML = '💧 Watered! (' + Math.ceil((S.waterEnd-now)/1000) + 's)';
+    ws.textContent = '';
+  } else if (now < S.waterCoolEnd) {
+    wb.disabled = true; wb.className = 'water-btn';
+    wb.innerHTML = '💧 Water Plants';
+    ws.textContent = 'Ready in ' + Math.ceil((S.waterCoolEnd-now)/1000) + 's…';
+  } else {
+    wb.disabled = false; wb.className = 'water-btn';
+    wb.innerHTML = '💧 Water Plants';
+    ws.textContent = '×3 pollen for 30 seconds';
+  }
+
+  renderPlants();
+  renderUpgrades();
+}
+
+function renderPlants() {
+  const sig = PLANTS.map(p=>`${S.plants[p.id]}_${S.pollen>=plantCost(p.id)?1:0}_${plantCost(p.id)}`).join('|');
+  if (sig===_lastPSig) return;
+  _lastPSig = sig;
+  const el = document.getElementById('plantList');
+  el.innerHTML = PLANTS.map(p => {
+    const cost = plantCost(p.id);
+    const afford = S.pollen >= cost;
+    return `<div class="plant-row ${afford?'can-afford':'no-afford'}" onclick="buyPlant('${p.id}')">
+      <span class="plant-row-em">${p.emoji}</span>
+      <div class="plant-row-info">
+        <div class="plant-row-name">${p.name}</div>
+        <div class="plant-row-desc">${p.desc}</div>
+      </div>
+      <div class="plant-row-right">
+        <div class="plant-row-cost">🌿 ${fmt(cost)}</div>
+        ${S.plants[p.id]>0 ? `<div class="plant-row-owned">${S.plants[p.id]} owned</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderUpgrades() {
+  const sig = UPGRADES.map(u=>
+    `${S.upgrades.includes(u.id)?1:0}_${S.pollen>=u.cost?1:0}`
+  ).join('|');
+  if (sig===_lastUSig) return;
+  _lastUSig = sig;
+  const el = document.getElementById('upgList');
+  el.innerHTML = UPGRADES.map(u => {
+    const done   = S.upgrades.includes(u.id);
+    const afford = !done && S.pollen >= u.cost;
+    const cls    = done ? 'done' : afford ? 'can-afford' : 'no-afford';
+    return `<div class="upg-row ${cls}" onclick="${done?'':'buyUpgrade(\''+u.id+'\')'}">
+      <span class="upg-icon">${u.icon}</span>
+      <div class="upg-info">
+        <div class="upg-name">${u.name}</div>
+        <div class="upg-desc">${u.desc}</div>
+      </div>
+      ${done ? '<span style="font-size:14px">✅</span>'
+             : `<div class="upg-cost">🌿 ${fmt(u.cost)}</div>`}
+    </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────
+//  POT DISPLAY
+// ─────────────────────────────────────────
+const _rendered = { daisy:0, tulip:0, sunflower:0 };
+
+function updatePots() {
+  const box = document.getElementById('potBox');
+  for (const p of PLANTS) {
+    while (_rendered[p.id] < S.plants[p.id] && box.children.length < 13) {
+      const w = document.createElement('div');
+      w.className = 'pot-wrap';
+      w.innerHTML = `<span class="plant-em">${p.emoji}</span><div class="pot-rim"></div><div class="pot-body"></div>`;
+      box.appendChild(w);
+      _rendered[p.id]++;
+    }
+  }
+}
+
+// ─────────────────────────────────────────
+//  SKY
+// ─────────────────────────────────────────
+function tickSky() {
+  const ph = phase();
+  const sky = document.getElementById('sky');
+  const cel = document.getElementById('celestial');
+  const stars = document.getElementById('stars');
+  const sunrays = document.getElementById('sunrays');
+
+  const skyBg = {
+    dawn:  'linear-gradient(180deg,#FF8050 0%,#FFB870 40%,#FFD8A0 100%)',
+    day:   'linear-gradient(180deg,#4AABEF 0%,#80C8F0 55%,#C8E8F8 100%)',
+    dusk:  'linear-gradient(180deg,#AA2820 0%,#E06030 35%,#FFAA60 75%,#FFD090 100%)',
+    night: 'linear-gradient(180deg,#080D18 0%,#141840 55%,#242860 100%)',
+  };
+  sky.style.background = skyBg[ph];
+
+  // Sun/moon arc
+  const arc = S.dayT * 420 - 10;
+  const h   = 30 + Math.sin(S.dayT * Math.PI) * -65;
+  cel.style.left = arc + 'px';
+  cel.style.top  = Math.max(8, h) + 'px';
+
+  if (ph==='night') {
+    cel.style.background  = '#EEE8AA';
+    cel.style.boxShadow   = '0 0 22px rgba(238,232,170,0.55)';
+    stars.style.opacity   = '1';
+    sunrays.style.opacity = '0';
+  } else {
+    const sunCol = { dawn:'#FFB040', day:'#FFD700', dusk:'#FF6A20' };
+    const sunGlo = { dawn:'rgba(255,176,64,0.55)', day:'rgba(255,215,0,0.55)', dusk:'rgba(255,106,32,0.55)' };
+    cel.style.background  = sunCol[ph];
+    cel.style.boxShadow   = `0 0 32px ${sunGlo[ph]}`;
+    stars.style.opacity   = '0';
+    sunrays.style.opacity = ph==='day' ? '1' : '0';
+  }
+}
+
+// ─────────────────────────────────────────
+//  PARTICLES
+// ─────────────────────────────────────────
+let _pTimer = 0;
+
+function tickParticles(sec) {
+  _pTimer += sec;
+  const rate = genRate();
+  const interval = Math.max(0.15, 1.8 / (1 + rate * 0.05));
+  if (_pTimer >= interval) { _pTimer = 0; spawnParticle(); }
+}
+
+function spawnParticle() {
+  const box = document.getElementById('particleBox');
+  if (box.children.length > 40) return;
+  const p   = document.createElement('div');
+  p.className = 'pollen-p';
+  const x   = 20 + Math.random() * 390;
+  const y   = 200 + Math.random() * 60;
+  const dx  = (Math.random()-0.5) * 70;
+  const dur = 1.6 + Math.random() * 2.2;
+  const sz  = 3 + Math.random() * 4;
+  const hue = 42 + Math.random() * 24;
+  p.style.cssText = `left:${x}px;top:${y}px;width:${sz}px;height:${sz}px;`+
+    `background:hsla(${hue},100%,62%,0.88);--dx:${dx}px;animation-duration:${dur}s;`;
+  box.appendChild(p);
+  setTimeout(()=>p.remove(), dur*1000);
+}
+
+function burst(n) {
+  for (let i=0;i<n;i++) setTimeout(spawnParticle, i*45);
+}
+
+// ─────────────────────────────────────────
+//  FEEDBACK
+// ─────────────────────────────────────────
+function floatText(txt) {
+  const el = document.createElement('div');
+  el.className = 'float-txt';
+  el.textContent = txt;
+  el.style.left = (30 + Math.random()*120) + 'px';
+  el.style.top  = '72%';
+  document.getElementById('windowOuter').appendChild(el);
+  setTimeout(()=>el.remove(), 1350);
+}
+
+let _toastT;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(_toastT);
+  _toastT = setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+// ─────────────────────────────────────────
+//  INIT SKY ELEMENTS
+// ─────────────────────────────────────────
+function initStars() {
+  const s = document.getElementById('stars');
+  for (let i=0;i<45;i++) {
+    const d=document.createElement('div');
+    d.className='star';
+    const sz=1+Math.random()*2.5;
+    d.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*72}%;`+
+      `width:${sz}px;height:${sz}px;animation-delay:${Math.random()*4}s;`+
+      `animation-duration:${1.8+Math.random()*2.5}s;`;
+    s.appendChild(d);
+  }
+}
+
+function initClouds() {
+  const box = document.getElementById('cloudBox');
+  for (let i=0;i<3;i++) {
+    const c=document.createElement('div');
+    c.className='cloud';
+    const w=65+Math.random()*80, h=18+Math.random()*18;
+    const dur=28+Math.random()*35;
+    c.style.cssText=`width:${w}px;height:${h}px;`+
+      `left:${Math.random()*360}px;top:${18+Math.random()*90}px;`+
+      `animation-duration:${dur}s;animation-delay:-${Math.random()*dur}s;opacity:0.68;`;
+    c.innerHTML=`
+      <div style="position:absolute;width:${w*.55}px;height:${h*1.7}px;background:inherit;border-radius:50%;left:${w*.15}px;top:-${h*.55}px"></div>
+      <div style="position:absolute;width:${w*.42}px;height:${h*1.4}px;background:inherit;border-radius:50%;left:${w*.47}px;top:-${h*.35}px"></div>`;
+    box.appendChild(c);
+  }
+}
+
+// ─────────────────────────────────────────
+//  SAVE / LOAD
+// ─────────────────────────────────────────
+function save() {
+  const d = {
+    pollen: S.pollen, plants: S.plants, upgrades: S.upgrades,
+    mult: S.mult, beeActive: S.beeActive, nightBloom: S.nightBloom,
+    sunbeam: S.sunbeam, dayT: S.dayT, waterCoolEnd: S.waterCoolEnd,
+    savedAt: Date.now()
+  };
+  localStorage.setItem('wgIdle2', JSON.stringify(d));
+  S.lastSave = Date.now();
+}
+
+function load() {
+  const raw = localStorage.getItem('wgIdle2');
+  if (!raw) return;
+  try {
+    const d = JSON.parse(raw);
+    S.pollen      = d.pollen      || 0;
+    S.plants      = d.plants      || {daisy:0,tulip:0,sunflower:0};
+    S.upgrades    = d.upgrades    || [];
+    S.mult        = d.mult        || 1;
+    S.beeActive   = d.beeActive   || false;
+    S.nightBloom  = d.nightBloom  || false;
+    S.sunbeam     = d.sunbeam     || false;
+    S.dayT        = d.dayT        || 0.25;
+    S.waterCoolEnd= d.waterCoolEnd|| 0;
+
+    // Re-apply visual-only effects
+    for (const id of S.upgrades) {
+      if (id==='beeFriend') document.getElementById('bee').style.display='block';
+    }
+
+    // Offline progress (max 4h, 55% efficiency)
+    if (d.savedAt) {
+      const offSec = Math.min((Date.now()-d.savedAt)/1000, 4*3600);
+      if (offSec > 15) {
+        const gain = genRate() * offSec * 0.55;
+        S.pollen += gain;
+        if (gain > 0) setTimeout(()=>toast('🌿 Welcome back! +'+fmt(gain)+' pollen while away'), 800);
+      }
+    }
+  } catch(e) { console.warn('Load failed',e); }
+}
+
+// ─────────────────────────────────────────
+//  MENU
+// ─────────────────────────────────────────
+let _loopStarted = false;
+
+function showMenu() {
+  const hasSave = !!localStorage.getItem('wgIdle2');
+  document.getElementById('btnContinue').style.display = hasSave ? 'block' : 'none';
+  document.getElementById('resetBtn').style.display    = hasSave ? 'inline' : 'none';
+  // Tweak label if no save
+  document.getElementById('btnNew').textContent = hasSave ? '🌱 New Garden' : '🌱 Start Garden';
+}
+
+function dismissMenu() {
+  const ov = document.getElementById('menuOverlay');
+  ov.classList.add('hidden');
+  setTimeout(() => ov.style.display = 'none', 650);
+}
+
+function beginGame() {
+  dismissMenu();
+  updatePots();
+  renderPlants();
+  renderUpgrades();
+  window.addEventListener('beforeunload', save);
+  if (!_loopStarted) {
+    _loopStarted = true;
+    requestAnimationFrame(loop);
+  }
+}
+
+function startNewGame() {
+  // If save exists, wipe it cleanly
+  localStorage.removeItem('wgIdle2');
+  // Reset state to fresh
+  S.pollen = 0;
+  S.plants = { daisy:0, tulip:0, sunflower:0 };
+  S.upgrades = [];
+  S.mult = 1;
+  S.beeActive = false;
+  S.nightBloom = false;
+  S.sunbeam = false;
+  S.dayT = 0.28;
+  S.waterActive = false;
+  S.waterEnd = 0;
+  S.waterCoolEnd = 0;
+  S.beeNextWater = 0;
+  S.rafT = null;
+  document.getElementById('bee').style.display = 'none';
+  // Clear pot box so no stale pots
+  document.getElementById('potBox').innerHTML = '';
+  _rendered.daisy = 0; _rendered.tulip = 0; _rendered.sunflower = 0;
+  // Gift a starting daisy
+  S.plants.daisy = 1;
+  beginGame();
+  setTimeout(() => toast('🌼 Your first daisy is planted!'), 700);
+}
+
+function startContinue() {
+  load();
+  beginGame();
+}
+
+function toggleConfirm() {
+  document.getElementById('confirmBox').classList.toggle('show');
+}
+
+function confirmReset() {
+  localStorage.removeItem('wgIdle2');
+  document.getElementById('confirmBox').classList.remove('show');
+  document.getElementById('btnContinue').style.display = 'none';
+  document.getElementById('resetBtn').style.display    = 'none';
+  document.getElementById('btnNew').textContent = '🌱 Start Garden';
+  toggleConfirm(); // hide box (already hidden, just tidy)
+}
+
+// ─────────────────────────────────────────
+//  BOOT
+// ─────────────────────────────────────────
+(function init() {
+  initStars();
+  initClouds();
+  showMenu();
+})();
+</script>
+</body>
+</html>
